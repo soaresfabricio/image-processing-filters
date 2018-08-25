@@ -1,5 +1,6 @@
 #include "Noise.hpp"
 #include "Color.hpp"
+#include "Filter.hpp"
 #include <string>
 
 int main(int argc, char const *argv[])
@@ -7,7 +8,7 @@ int main(int argc, char const *argv[])
     if (argc < 2)
     {
         std::cout << ">> Usage: ./[this tool] [input file name] [mono | color] [filter number]" << std::endl;
-        std::cout << ">> Available filters: \n\t0: \tNo filter \n\t1-3: \tR, G and B splitting to monocromatic image. \n\t4-6: \tR, G and B splitting to color image.\n\t7: \tAdd Salt and Pepper noise." << std::endl;
+        std::cout << ">> Available filters: \n\t0: \tNo filter \n\t1-3: \tR, G and B splitting to monocromatic image. \n\t4-6: \tR, G and B splitting to color image.\n\t7: \tAdd Salt and Pepper noise.\n\t8-10: \tBox filters of size 3, 7 and 11.." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -61,8 +62,20 @@ int main(int argc, char const *argv[])
         break;
     case 7:
         img_out = noise_saltpepper(img, 0.05f);
-         std::cout << ">> Adding salt and pepper noise to input image." << std::endl;
+        std::cout << ">> Adding salt and pepper noise to input image." << std::endl;
         output_name += "_saltpepper";
+        break;
+    case 8:
+        img_out = mean_filter(img, 3);
+        output_name += "_mean_3";
+        break;
+    case 9:
+        img_out = mean_filter(img, 7);
+        output_name += "_mean_7";
+        break;
+    case 10:
+        img_out = mean_filter(img, 11);
+        output_name += "_mean_11";
         break;
     }
 

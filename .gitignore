@@ -31,5 +31,10 @@
 *.out
 *.app
 .vscode/settings.json
-Assignment 1/original/teste.png
-Assignment 1/main
+
+# Output images
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.tiff

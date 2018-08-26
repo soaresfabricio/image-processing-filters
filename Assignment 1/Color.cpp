@@ -2,9 +2,6 @@
 
 Mat split(const Mat &img, int channel, bool mono)
 {
-
-	int type;
-
 	Mat img_out(img.size(), mono ? MONO_IMAGE : COLOR_IMAGE);
 
 	for (int j = 0; j < img.rows; j++)

@@ -1,6 +1,12 @@
 #include "Filter.hpp"
 #include "Color.hpp"
 
+template<typename T>
+void print(T const& msg)
+{
+    std::cout << msg << std::endl;
+}
+
 /** For a given image, apply a certain mask */
 Mat filter(const Mat &img, const Mat &mask)
 {
@@ -13,8 +19,10 @@ Mat filter_rgb(const Mat &img, const Mat &mask)
 {
 	Mat channel[3];
 
+	print("Filtering channel: ");
 	for (int i = 0; i < 3; i++)
 	{
+		print(i);
 		channel[i] = filter_mono(split(img, i, true), mask);
 	}
 
@@ -129,4 +137,66 @@ Mat median_filter_mono(const Mat &img, uint size)
 	}
 
 	return img_out;
+}
+
+/** For a given image, applies the sobel filter */
+Mat sobel_filter(const Mat &img)
+{
+	Mat img_out = sobel_filter_ver(img) + sobel_filter_hor(img);
+
+	bool color = true;
+	if (img_out.type() == CV_32FC1 || img_out.type() == CV_8UC1)
+		color = false;
+
+	// Handles overflowing pixels
+	for (int j = 0; j < img_out.rows; j++)
+	{
+		for (int i = 0; i < img_out.cols + color * img.cols * 2; i++)
+		{
+			uchar pixel = img_out.at<uchar>(j, i);
+
+			if (pixel > 255)
+				pixel = 255;
+			else if (pixel < 0)
+				pixel = 0;
+
+			img_out.at<uchar>(j, i) = pixel;
+		}
+	}
+	return img_out;
+}
+
+/** For a given image, applies the vertical sobel filter */
+Mat sobel_filter_ver(const Mat &img)
+{
+	print("Vertical...");
+	Mat mask = (Mat_<float>(3, 3) << 
+				1, 2, 1,
+				0, 0, 0,
+				-1, -2, -1);
+
+	return filter(img, mask);
+}
+
+/** For a given image, applies the horizontal sobel filter */
+Mat sobel_filter_hor(const Mat &img)
+{
+	print("Horizontal...");
+	Mat mask = (Mat_<float>(3, 3) << 
+				-1, 0, 1,
+				-2, 0, 2,
+				-1, 0, 1);
+
+	return filter(img, mask);
+}
+
+
+Mat laplacian_filter(const Mat &img){
+	
+	Mat	mask  = (Mat_<float>(3, 3)<<
+				 0,  1,  0,
+				 1, -4,  1,
+				 0,  1,  0);
+
+	return filter(img, mask);
 }

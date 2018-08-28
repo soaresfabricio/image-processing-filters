@@ -8,7 +8,7 @@ int main(int argc, char const *argv[])
     if (argc < 2)
     {
         std::cout << ">> Usage: ./[this tool] [input file name] [mono | color] [filter number]" << std::endl;
-        std::cout << ">> Available filters: \n\t0: \tNo filter \n\t1-3: \tR, G and B splitting to monocromatic image. \n\t4-6: \tR, G and B splitting to color image.\n\t7: \tAdd Salt and Pepper noise.\n\t8-10: \tBox filters of size 3, 7 and 11.\n\t11-113: \tMedian filters of size 3, 7 and 11." << std::endl;
+        std::cout << ">> Available filters: \n\t0: \tNo filter \n\t1-3: \tR, G and B splitting to monocromatic image. \n\t4-6: \tR, G and B splitting to color image.\n\t7: \tAdd Salt and Pepper noise.\n\t8-10: \tBox filters of size 3, 7 and 11.\n\t11-13: \tMedian filters of size 3, 7 and 11.\n\t14: \tSobel filter (edge detection). \n\t15: \tLaplacian filter (edge detection)." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -94,6 +94,15 @@ int main(int argc, char const *argv[])
         std::cout << ">> Processing a median filter (size 11) on the input image." << std::endl;
         img_out = median_filter(img, 11);
         output_name += "_med_11";
+        break;
+    case 14:
+        std::cout << ">> Processing a sobel filter on the input image." << std::endl;
+        img_out = sobel_filter(img);
+        output_name += "_sobel";
+        break;
+    case 15:
+        img_out = laplacian_filter(img);
+        output_name += "_laplacian";
         break;
     }
 

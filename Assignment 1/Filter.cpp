@@ -21,8 +21,14 @@ Mat filter_rgb(const Mat &img, const Mat &mask)
 
 	print("Filtering channel: ");
 	for (int i = 0; i < 3; i++)
-	{
-		print(i);
+	{	
+		switch (i)
+		{
+			case 0: print("R"); break;
+			case 1: print("G"); break;
+			case 2: print("B"); break;
+			default:	break;
+		}
 		channel[i] = filter_mono(split(img, i, true), mask);
 	}
 

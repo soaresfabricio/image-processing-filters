@@ -8,7 +8,7 @@ int main(int argc, char const *argv[])
     if (argc < 2)
     {
         std::cout << ">> Usage: ./[this tool] [input file name] [mono | color] [filter number]" << std::endl;
-        std::cout << ">> Available filters: \n\t0: \tNo filter \n\t1-3: \tR, G and B splitting to monocromatic image. \n\t4-6: \tR, G and B splitting to color image.\n\t7: \tAdd Salt and Pepper noise.\n\t8-10: \tBox filters of size 3, 7 and 11.\n\t11-13: \tMedian filters of size 3, 7 and 11.\n\t14: \tSobel filter (edge detection). \n\t15: \tLaplacian filter (edge detection)." << std::endl;
+        std::cout << ">> Available filters: \n\t0: \tNo filter \n\t1-3: \tR, G and B splitting to monocromatic image. \n\t4-6: \tR, G and B splitting to color image.\n\t7: \tAdd Salt and Pepper noise.\n\t8-10: \tBox filters of size 3, 7 and 11.\n\t11-13: \tMedian filters of size 3, 7 and 11.\n\t14: \tSobel filter (edge detection). \n\t15: \tLaplacian filter (edge detection). \n\t16: \tNegative of input image." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -18,11 +18,19 @@ int main(int argc, char const *argv[])
     std::string input_name = "./original/" + file_name;
     file_name.substr(0, file_name.length() - 4); // remove extension
 
-    std::cout << "Input image loaded from: " + input_name << std::endl;
 
     int load_type = strcmp(argv[2], "mono") ? CV_LOAD_IMAGE_COLOR : CV_LOAD_IMAGE_GRAYSCALE;
 
     Mat img = imread(input_name, load_type);
+
+    if (!img.data)
+    {
+        std::cout << "Could not open or find the image " + input_name << std::endl;
+        return -1;
+    }
+
+    std::cout << "Input image loaded from: " + input_name << std::endl;
+
     Mat img_out, mask;
 
     std::string output_name = "./processed/" + file_name;
@@ -103,6 +111,14 @@ int main(int argc, char const *argv[])
     case 15:
         img_out = laplacian_filter(img);
         output_name += "_laplacian";
+        break;
+    case 16:
+        img_out = negative_rgb(img);
+        output_name += "_negative_rgb";
+        break;
+    case 17:
+        img_out = negative_y(img);
+        output_name += "_negative_y";
         break;
     }
 

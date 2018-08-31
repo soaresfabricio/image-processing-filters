@@ -1,12 +1,12 @@
 #include "Color.hpp"
 
-Matx33f rgb2yiq_mat (0.299f,  0.587f,  0.114f,
-					 0.596f, -0.274f, -0.322f,
-					 0.211f, -0.523f,  0.312f);
+Matx33f rgb2yiq_mat(0.299f, 0.587f, 0.114f,
+					0.596f, -0.274f, -0.322f,
+					0.211f, -0.523f, 0.312f);
 
-Matx33f yiq2rgb_mat(1.0f,  0.956f,  0.621f,
+Matx33f yiq2rgb_mat(1.0f, 0.956f, 0.621f,
 					1.0f, -0.272f, -0.647f,
-					1.0f, -1.106f,  1.703f);
+					1.0f, -1.106f, 1.703f);
 
 Mat split(const Mat &img, int channel, bool mono)
 {
@@ -85,7 +85,6 @@ Mat negative_y(const Mat &img)
 	return yiq2rgb(img_out);
 }
 
-
 Mat rgb2yiq2rgb(const Mat &img)
 {
 	return yiq2rgb(rgb2yiq(img));
@@ -140,4 +139,100 @@ Mat yiq2rgb(const Mat &img)
 	img_out.convertTo(img_out, CV_8UC3);
 
 	return img_out;
+}
+
+
+// Segments an image into two groups of pixels, 
+// one above and the other below a value
+Mat thresholding(const Mat &img, uchar threshold, int type, bool mean)
+{
+	Mat img_out;
+	bool color = true;
+
+	if (img.type() == CV_32FC1 || img.type() == CV_8UC1)
+	{
+		color = false;
+		img_out = img;
+		return thresholding_mono(img_out, threshold, type, mean);
+	}
+	else
+	{
+		img_out = rgb2yiq(img);
+		return thresholding_yiq(img_out, float(threshold), type, mean);
+	}
+}
+
+// Segments a monochromatic image into two groups of pixels, 
+// one above and the other below a value
+Mat thresholding_mono(const Mat &img, uchar threshold, int type, bool mean)
+{
+	Mat img_out = img;
+	if (mean)
+		threshold = mean_y_uchar(img_out);
+
+	for (int j = 0; j < img.rows; j++)
+	{
+		for (int i = 0; i < img.cols; i++)
+		{
+			if (type == 0)
+				img_out.at<uchar>(j, i) = img_out.at<uchar>(j, i) > threshold ? 255 : 0;
+			else if (type == 1)
+				img_out.at<uchar>(j, i) = img_out.at<uchar>(j, i) > threshold ? 255 : img_out.at<uchar>(j, i);
+			else
+				img_out.at<uchar>(j, i) = img_out.at<uchar>(j, i) > threshold ? threshold : img_out.at<uchar>(j, i);
+		}
+	}
+
+	return img_out;
+}
+
+// Segments a colored image into two groups of pixels, 
+// one above and the other below a value
+Mat thresholding_yiq(const Mat &img, float threshold, int type, bool mean)
+{
+
+	Mat img_out = img;
+	if (mean)
+		threshold = mean_y_float(img_out);
+
+	for (int j = 0; j < img.rows; j++)
+	{
+		for (int i = 2; i < img.cols * 3; i += 3)
+		{
+			if (type == 0)
+				img_out.at<float>(j, i) = img_out.at<float>(j, i) > threshold ? 255 : 0;
+			else if (type == 1)
+				img_out.at<float>(j, i) = img_out.at<float>(j, i) > threshold ? 255 : img_out.at<float>(j, i);
+			else
+				img_out.at<float>(j, i) = img_out.at<float>(j, i) > threshold ? threshold : img_out.at<float>(j, i);
+		}
+	}
+
+	return yiq2rgb(img_out);
+}
+
+// Finds the mean of the values from the Y channel
+uchar mean_y_uchar(const Mat &img){
+
+	long mean = 0;
+
+	for(int j = 0; j < img.rows; j++)
+		for(int i = 0; i < img.cols; i ++)
+			mean += img.at<uchar>(j, i);
+
+	mean = mean / (img.rows * img.cols);
+	return mean;
+}
+
+// Finds the mean of the values from the Y channel (float version)
+float mean_y_float(const Mat &img){
+
+	float mean = 0;
+
+	for(int j = 0; j < img.rows; j++)
+		for(int i = 2; i < img.cols*3; i +=3)
+			mean += img.at<float>(j, i);
+
+	mean = mean / (img.rows * img.cols);
+	return mean;
 }

@@ -8,7 +8,7 @@ int main(int argc, char const *argv[])
     if (argc < 2)
     {
         std::cout << ">> Usage: ./[this tool] [input file name] [mono | color] [filter number]" << std::endl;
-        std::cout << ">> Available filters: \n\t0: \tNo filter \n\t1-3: \tR, G and B splitting to monocromatic image. \n\t4-6: \tR, G and B splitting to color image.\n\t7: \tAdd Salt and Pepper noise.\n\t8-10: \tBox filters of size 3, 7 and 11.\n\t11-13: \tMedian filters of size 3, 7 and 11.\n\t14: \tSobel filter (edge detection). \n\t15: \tLaplacian filter (edge detection). \n\t16: \tNegative of input image." << std::endl;
+        std::cout << ">> Available filters: \n\t0: \tNo filter \n\t1-3: \tR, G and B splitting to monocromatic image. \n\t4-6: \tR, G and B splitting to color image.\n\t7: \tAdd Salt and Pepper noise.\n\t8-10: \tBox filters of size 3, 7 and 11.\n\t11-13: \tMedian filters of size 3, 7 and 11.\n\t14: \tSobel filter (edge detection). \n\t15: \tLaplacian filter (edge detection). \n\t16-17: \tNegative of input image (RGB and Y). \n\t18-22: \tThresholding (50, 20, 200, 230, Y channel mean)" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -119,6 +119,26 @@ int main(int argc, char const *argv[])
     case 17:
         img_out = negative_y(img);
         output_name += "_negative_y";
+        break;
+    case 18:
+        img_out = thresholding(img, 50, 0, false);
+        output_name += "_thres_50";
+        break;
+    case 19:
+        img_out = thresholding(img, 120, 0, false);
+        output_name += "_thres_120";
+        break;
+    case 20:
+        img_out = thresholding(img, 200, 0, false);
+        output_name += "_thres_200";
+        break;
+    case 21:
+        img_out = thresholding(img, 230, 0, false);
+        output_name += "_thres_230";
+        break;
+    case 22:
+        img_out = thresholding(img, 0, 0, true);
+        output_name += "_thres_mean";
         break;
     }
 

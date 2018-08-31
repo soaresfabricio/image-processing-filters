@@ -196,7 +196,7 @@ Mat sobel_filter_hor(const Mat &img)
 	return filter(img, mask);
 }
 
-
+/** For a given image, applies the laplacian  filter */
 Mat laplacian_filter(const Mat &img){
 	
 	Mat	mask  = (Mat_<float>(3, 3)<<

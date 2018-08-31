@@ -31,6 +31,8 @@
 *.out
 *.app
 .vscode/settings.json
+pdi
+CMakeFiles/*
 
 # Output images
 *.png

@@ -141,8 +141,7 @@ Mat yiq2rgb(const Mat &img)
 	return img_out;
 }
 
-
-// Segments an image into two groups of pixels, 
+// Segments an image into two groups of pixels,
 // one above and the other below a value
 Mat thresholding(const Mat &img, uchar threshold, int type, bool mean)
 {
@@ -162,7 +161,7 @@ Mat thresholding(const Mat &img, uchar threshold, int type, bool mean)
 	}
 }
 
-// Segments a monochromatic image into two groups of pixels, 
+// Segments a monochromatic image into two groups of pixels,
 // one above and the other below a value
 Mat thresholding_mono(const Mat &img, uchar threshold, int type, bool mean)
 {
@@ -186,7 +185,7 @@ Mat thresholding_mono(const Mat &img, uchar threshold, int type, bool mean)
 	return img_out;
 }
 
-// Segments a colored image into two groups of pixels, 
+// Segments a colored image into two groups of pixels,
 // one above and the other below a value
 Mat thresholding_yiq(const Mat &img, float threshold, int type, bool mean)
 {
@@ -212,12 +211,13 @@ Mat thresholding_yiq(const Mat &img, float threshold, int type, bool mean)
 }
 
 // Finds the mean of the values from the Y channel
-uchar mean_y_uchar(const Mat &img){
+uchar mean_y_uchar(const Mat &img)
+{
 
 	long mean = 0;
 
-	for(int j = 0; j < img.rows; j++)
-		for(int i = 0; i < img.cols; i ++)
+	for (int j = 0; j < img.rows; j++)
+		for (int i = 0; i < img.cols; i++)
 			mean += img.at<uchar>(j, i);
 
 	mean = mean / (img.rows * img.cols);
@@ -225,14 +225,98 @@ uchar mean_y_uchar(const Mat &img){
 }
 
 // Finds the mean of the values from the Y channel (float version)
-float mean_y_float(const Mat &img){
+float mean_y_float(const Mat &img)
+{
 
 	float mean = 0;
 
-	for(int j = 0; j < img.rows; j++)
-		for(int i = 2; i < img.cols*3; i +=3)
+	for (int j = 0; j < img.rows; j++)
+		for (int i = 2; i < img.cols * 3; i += 3)
 			mean += img.at<float>(j, i);
 
 	mean = mean / (img.rows * img.cols);
 	return mean;
+}
+
+Mat add_brightness(const Mat &img, int c)
+{
+	bool color = true;
+	if (img.type() == CV_32FC1 || img.type() == CV_8UC1)
+		color = false;
+
+	Mat img_out(img.size(), img.type());
+
+	for (int j = 0; j < img.rows; j++)
+	{
+		for (int i = 0; i < img.cols + color * img.cols * 2; i++)
+		{
+			int pixel = img.at<uchar>(j, i) + c;
+
+			if (pixel > 255)
+				pixel = 255;
+			else if (pixel < 0)
+				pixel = 0;
+			img_out.at<uchar>(j, i) = pixel;
+		}
+	}
+	return img_out;
+}
+
+Mat mul_brightness(const Mat &img, float c, bool rgb)
+{
+	if (rgb)
+		return mul_brightness_rgb(img, c);
+	else
+		return mul_brightness_y(img, c);
+}
+
+Mat mul_brightness_rgb(const Mat &img, float c)
+{
+	if (c < 0.0f)
+		return img;
+
+	bool color = true;
+	if (img.type() == CV_32FC1 || img.type() == CV_8UC1)
+		color = false;
+
+	Mat img_out(img.size(), img.type());
+
+	for (int j = 0; j < img.rows; j++)
+	{
+		for (int i = 0; i < img.cols + color * img.cols * 2; i++)
+		{
+			float pixel = img.at<uchar>(j, i) * c;
+
+			if (pixel > 255.0f)
+				pixel = 255.0f;
+
+			img_out.at<uchar>(j, i) = pixel;
+		}
+	}
+	return img_out;
+}
+
+Mat mul_brightness_y(const Mat &img, float c)
+{
+
+	if (c < 0.0f)
+		return img;
+
+	Mat img_out = rgb2yiq(img);
+
+	for (int j = 0; j < img.rows; j++)
+	{
+		for (int i = 2; i < img.cols * 3; i += 3)
+		{
+
+			float pixel = img_out.at<float>(j, i) * c;
+
+			if (pixel > 255.0f)
+				pixel = 255.0f;
+
+			img_out.at<float>(j, i) = pixel;
+		}
+	}
+
+	return yiq2rgb(img_out);
 }

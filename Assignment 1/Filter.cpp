@@ -1,3 +1,4 @@
+#include <fstream>
 #include "Filter.hpp"
 #include "Color.hpp"
 
@@ -29,6 +30,7 @@ Mat filter_rgb(const Mat &img, const Mat &mask)
 			case 2: print("B"); break;
 			default:	break;
 		}
+
 		channel[i] = filter_mono(split(img, i, true), mask);
 	}
 
@@ -49,15 +51,20 @@ Mat filter_mono(const Mat &img, const Mat &mask)
 	// Starts at the first pixel of the original image (size of the radius)
 	for (int j = radius; j < img.rows + radius; j++)
 	{
+
 		for (int i = radius; i < img.cols + radius; i++)
 		{
 			// Creats a region and multiplies it times the mask
 			Rect region(i - radius, j - radius, mask.rows, mask.cols);
 			Mat img_region = img_pad(region);
 			img_region.convertTo(img_region, CV_32F);
+
+
 			img_region = img_region.mul(mask); 
 
+
 			float pixel = sum(img_region)[0];
+
 
 			// Ignores non-byte values (and negative values)
 			if (pixel > 255)
@@ -192,6 +199,39 @@ Mat sobel_filter_hor(const Mat &img)
 				-1, 0, 1,
 				-2, 0, 2,
 				-1, 0, 1);
+
+	return filter(img, mask);
+}
+
+Mat filter_file(const Mat &img, const char* file_name){
+
+	std::ifstream in(file_name);
+
+	if (!in)
+	{
+		std::cout << "Cannot open file.\n";
+		exit(EXIT_FAILURE);
+	}
+
+	int x_i, y_i;
+
+	in >> x_i;
+	y_i = x_i;
+
+	Mat mask = Mat_<float>(y_i, x_i);
+
+	for (int y = 0; y < y_i; y++)
+	{
+		for (int x = 0; x < x_i; x++)
+		{
+			float tmp;
+			in >> mask.at<float>(y,x);
+		}
+	}
+
+	in.close();
+
+	std::cout << "The mask is: \n" << mask << std::endl;
 
 	return filter(img, mask);
 }

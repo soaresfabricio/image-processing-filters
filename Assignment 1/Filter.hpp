@@ -19,5 +19,6 @@ Mat sobel_filter(const Mat &img);
 Mat laplacian_filter_ver(const Mat &img);
 Mat laplacian_filter_hor(const Mat &img);
 Mat laplacian_filter(const Mat &img);
+Mat filter_file(const Mat &img, const char* file_name);
 
 #endif

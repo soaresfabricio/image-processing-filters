@@ -7,8 +7,8 @@ int main(int argc, char const *argv[])
 {
     if (argc < 2)
     {
-        std::cout << ">> Usage: ./[this tool] [input file name] [mono | color] [filter number]" << std::endl;
-        std::cout << ">> Available filters: \n\t0: \tNo filter \n\t1-3: \tR, G and B splitting to monocromatic image. \n\t4-6: \tR, G and B splitting to color image.\n\t7: \tAdd Salt and Pepper noise.\n\t8-10: \tBox filters of size 3, 7 and 11.\n\t11-13: \tMedian filters of size 3, 7 and 11.\n\t14: \tSobel filter (edge detection). \n\t15-16: \tNegative of input image (RGB and Y). \n\t17-21: \tThresholding (50, 20, 200, 230, Y channel mean). \n\t22-25: \tAdd brightness (30, 80, -100, -150).\n\t26-27: \tMultiply brightness (RGB, 0.5 and 1.5). \n\t28-29: \tMultiply brightness (Y, 0.5 and 1.5)." << std::endl;
+        std::cout << ">> Usage: ./[this tool] [input file name] [mono | color] [filter number] [filter options]" << std::endl;
+        std::cout << ">> Available filters: \n\t0: \tNo filter \n\t1-3: \tR, G and B splitting to monocromatic image. \n\t4-6: \tR, G and B splitting to color image.\n\t7: \tAdd Salt and Pepper noise.\n\t8-10: \tBox filtering (size 3, 11, user value).\n\t11-13: \tMedian filters of size 3, 7 and 11.\n\t14: \tSobel filter (edge detection). \n\t15-16: \tNegative of input image (RGB and Y). \n\t17-21: \tThresholding (50, 120, 200, user value, Y channel mean). \n\t22-25: \tAdd brightness (30, 80, -100, -150).\n\t26-27: \tMultiply brightness (RGB, 0.5 and 1.5). \n\t28-29: \tMultiply brightness (Y, 0.5 and 1.5). \n\t30: \tProvide a file containing a mask." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -80,14 +80,19 @@ int main(int argc, char const *argv[])
         output_name += "_mean_3";
         break;
     case 9:
-        std::cout << ">> Processing box filter (size 7) on the input image." << std::endl;
-        img_out = mean_filter(img, 7);
-        output_name += "_mean_7";
-        break;
-    case 10:
         std::cout << ">> Processing box filter (size 11) on the input image." << std::endl;
         img_out = mean_filter(img, 11);
         output_name += "_mean_11";
+        break;
+    case 10:
+         if (!(argv[4]))
+        {
+            std::cout << "Convolution size missing." << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        std::cout << ">> Processing box filter with input size." << std::endl;
+        img_out = mean_filter(img, atoi(argv[4]));
+        output_name += "_mean_" + std::string(argv[4]);
         break;
     case 11:
         std::cout << ">> Processing median filter (size 3) on the input image." << std::endl;
@@ -135,9 +140,14 @@ int main(int argc, char const *argv[])
         output_name += "_thres_200";
         break;
     case 20:
-        std::cout << ">> Thresholding input image (230)." << std::endl;
-        img_out = thresholding(img, 230, 0, false);
-        output_name += "_thres_230";
+        if (!(argv[4]))
+        {
+            std::cout << "Thresholding value missing." << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        std::cout << ">> Thresholding input image with user input." << std::endl;
+        img_out = thresholding(img, atoi(argv[4]), 0, false);
+        output_name += "_thres_" + std::string(argv[4]);
         break;
     case 21:
         std::cout << ">> Thresholding input image (Y channel mean value)." << std::endl;
@@ -166,7 +176,7 @@ int main(int argc, char const *argv[])
         break;
     case 26:
         std::cout << ">> [RGB] Multiplying brightness of image by 0.5." << std::endl;
-        img_out = mul_brightness_rgb(img, 0.5f);    
+        img_out = mul_brightness_rgb(img, 0.5f);
         output_name += "_brgt_mul_rgb-50";
         break;
     case 27:
@@ -183,6 +193,16 @@ int main(int argc, char const *argv[])
         std::cout << ">> [Y-channel] Multiplying brightness of image by 1.5." << std::endl;
         img_out = mul_brightness_y(img, 1.5f);
         output_name += "_brgt_mul_y+50";
+        break;
+    case 30:
+        if (!(argv[4]))
+        {
+            std::cout << "You need to specify a mask file!" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        std::cout << ">> Applying input mask." << std::endl;
+        img_out = filter_file(img,argv[4]);
+        output_name += "_from_" + std::string(argv[4]);
         break;
     }
 

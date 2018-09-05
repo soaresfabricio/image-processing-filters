@@ -1,4 +1,6 @@
 #include "Color.hpp"
+#include <boost/progress.hpp>
+
 
 Matx33f rgb2yiq_mat(0.299f, 0.587f, 0.114f,
 					0.596f, -0.274f, -0.322f,
@@ -303,6 +305,7 @@ Mat mul_brightness_y(const Mat &img, float c)
 		return img;
 
 	Mat img_out = rgb2yiq(img);
+
 
 	for (int j = 0; j < img.rows; j++)
 	{

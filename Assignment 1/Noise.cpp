@@ -22,6 +22,8 @@ Mat noise_saltpepper_mono(const Mat &img, float density){
 	uchar pixel;
 	Mat out_img(img.size(), img.type());
 
+	
+
 	for(int j = 0; j < img.rows; j++){
 		for(int i = 0; i < img.cols; i++){
 			pixel = uchar(rand()%256);			

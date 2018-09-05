@@ -1,6 +1,7 @@
 #include <fstream>
 #include "Filter.hpp"
 #include "Color.hpp"
+#include <omp.h>
 
 template<typename T>
 void print(T const& msg)
@@ -20,17 +21,10 @@ Mat filter_rgb(const Mat &img, const Mat &mask)
 {
 	Mat channel[3];
 
-	print("Filtering channel: ");
+	#pragma omp parallel
+	#pragma omp for
 	for (int i = 0; i < 3; i++)
 	{	
-		switch (i)
-		{
-			case 0: print("R"); break;
-			case 1: print("G"); break;
-			case 2: print("B"); break;
-			default:	break;
-		}
-
 		channel[i] = filter_mono(split(img, i, true), mask);
 	}
 
@@ -48,12 +42,18 @@ Mat filter_mono(const Mat &img, const Mat &mask)
 	Mat img_pad;
 	copyMakeBorder(img, img_pad, radius, radius, radius, radius, BORDER_REFLECT101);
 
+	//const unsigned long expected_count= (img.rows + radius) * (img.cols + radius);
+    //boost::progress_display show_progress( expected_count );
+
 	// Starts at the first pixel of the original image (size of the radius)
+	
+	#pragma omp parallel
+	#pragma omp for
 	for (int j = radius; j < img.rows + radius; j++)
 	{
-
 		for (int i = radius; i < img.cols + radius; i++)
 		{
+        	//++show_progress;
 			// Creats a region and multiplies it times the mask
 			Rect region(i - radius, j - radius, mask.rows, mask.cols);
 			Mat img_region = img_pad(region);
@@ -112,6 +112,8 @@ Mat median_filter_rgb(const Mat &img, uint size)
 {
 	Mat channel[3];
 
+	#pragma omp parallel
+	#pragma omp for
 	for (int i = 0; i < 3; i++)
 	{
 		channel[i] = median_filter_mono(split(img, i, true), size);
@@ -130,6 +132,8 @@ Mat median_filter_mono(const Mat &img, uint size)
 	Mat img_pad;
 	copyMakeBorder(img, img_pad, radius, radius, radius, radius, BORDER_REFLECT101);
 
+	#pragma omp parallel
+	#pragma omp for
 	for (int j = radius; j < img.rows + radius; j++)
 	{
 		for (int i = radius; i < img.cols + radius; i++)
@@ -138,6 +142,7 @@ Mat median_filter_mono(const Mat &img, uint size)
 			Mat img_region = img_pad(region);
 
 			std::vector<uchar> array(size * size);
+
 
 			for (int k = 0; k < size; k++)
 				for (int m = 0; m < size; m++)
@@ -148,7 +153,6 @@ Mat median_filter_mono(const Mat &img, uint size)
 			img_out.at<uchar>(j - radius, i - radius) = array[median]; // Acessing the position of the median
 		}
 	}
-
 	return img_out;
 }
 
@@ -157,25 +161,27 @@ Mat sobel_filter(const Mat &img)
 {
 	Mat img_out = sobel_filter_ver(img) + sobel_filter_hor(img);
 
-	bool color = true;
-	if (img_out.type() == CV_32FC1 || img_out.type() == CV_8UC1)
-		color = false;
+	// bool color = true;
+	// if (img_out.type() == CV_32FC1 || img_out.type() == CV_8UC1)
+	// 	color = false;
 
-	// Handles overflowing pixels
-	for (int j = 0; j < img_out.rows; j++)
-	{
-		for (int i = 0; i < img_out.cols + color * img.cols * 2; i++)
-		{
-			uchar pixel = img_out.at<uchar>(j, i);
+	// // Handles overflowing pixels
 
-			if (pixel > 255)
-				pixel = 255;
-			else if (pixel < 0)
-				pixel = 0;
+	// for (int j = 0; j < img_out.rows; j++)
+	// {
+	// 	for (int i = 0; i < img_out.cols + color * img.cols * 2; i++)
+	// 	{
+			
+	// 		uchar pixel = img_out.at<uchar>(j, i);
 
-			img_out.at<uchar>(j, i) = pixel;
-		}
-	}
+	// 		if (pixel > 255)
+	// 			pixel = 255;
+	// 		else if (pixel < 0)
+	// 			pixel = 0;
+
+	// 		img_out.at<uchar>(j, i) = pixel;
+	// 	}
+	// }
 	return img_out;
 }
 

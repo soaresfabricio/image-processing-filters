@@ -16,13 +16,12 @@ jobs:
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ubuntu-latest
+    container: 
+      image: pachyderm/opencv
 
     steps:
     - uses: actions/checkout@v2
-    
-    - name: Setup OpenCV
-      uses: Dovyski/setup-opencv-action@v1
-      
+
     - name: Setup boost
       run: sudo apt-get update && sudo apt-get install -yq libboost1.65-dev
 
